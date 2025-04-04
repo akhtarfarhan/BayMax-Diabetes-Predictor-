@@ -1,180 +1,172 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide pregnancies field based on gender
+    const maleRadio = document.getElementById('male');
+    const femaleRadio = document.getElementById('female');
+    const pregnanciesGroup = document.getElementById('pregnanciesGroup');
+
+    maleRadio.addEventListener('change', function() {
+        if (this.checked) {
+            pregnanciesGroup.style.display = 'none';
+        }
+    });
+
+    femaleRadio.addEventListener('change', function() {
+        if (this.checked) {
+            pregnanciesGroup.style.display = 'block';
+        }
+    });
+
+    // Form validation
+    const predictionForm = document.getElementById('predictionForm');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultValue = document.getElementById('resultValue');
+    const resultDescription = document.getElementById('resultDescription');
+    const newPredictionBtn = document.getElementById('newPredictionBtn');
+
+    // Validation constraints
+    const constraints = {
+        age: { min: 18, max: 120 },
+        weight: { min: 30, max: 300 },
+        height: { min: 100, max: 250 },
+        pregnancies: { min: 0, max: 20 },
+        glucose: { min: 70, max: 400 },
+        bloodPressure: { min: 60, max: 200 },
+        skinThickness: { min: 10, max: 100 },
+        insulin: { min: 0, max: 846 }
+    };
+
+    // Validate a field
+    function validateField(field, min, max) {
+        const value = parseFloat(field.value);
+        const errorId = field.id + 'Error';
+        const errorElement = document.getElementById(errorId);
+        
+        if (isNaN(value) || value < min || value > max) {
+            field.classList.add('error');
+            errorElement.classList.add('visible');
+            return false;
+        } else {
+            field.classList.remove('error');
+            errorElement.classList.remove('visible');
+            return true;
+        }
+    }
+
+    // Validate on input
+    for (const fieldName in constraints) {
+        const field = document.getElementById(fieldName);
+        if (field) {
+            field.addEventListener('input', function() {
+                validateField(this, constraints[fieldName].min, constraints[fieldName].max);
+            });
+        }
+    }
+
+    // Form submission
+    predictionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validate all fields
+        let isValid = true;
+        for (const fieldName in constraints) {
+            const field = document.getElementById(fieldName);
+            if (field && (fieldName !== 'pregnancies' || femaleRadio.checked)) {
+                const fieldValid = validateField(field, constraints[fieldName].min, constraints[fieldName].max);
+                isValid = isValid && fieldValid;
+            }
+        }
+
+        if (isValid) {
+            // Collect form data
+            const formData = {
+                gender: document.querySelector('input[name="gender"]:checked').value,
+                age: document.getElementById('age').value,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value,
+                pregnancies: femaleRadio.checked ? document.getElementById('pregnancies').value : null,
+                glucose: document.getElementById('glucose').value,
+                bloodPressure: document.getElementById('bloodPressure').value,
+                skinThickness: document.getElementById('skinThickness').value,
+                insulin: document.getElementById('insulin').value
+            };
+
+            // Send data to server
+            fetch('/predict/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({ data: formData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show result briefly before redirecting
+                    resultValue.textContent = `${data.risk_level}`;
+                    resultDescription.innerHTML = `
+                        Your predicted diabetes risk is <strong>${data.risk_level}</strong> 
+                        (${(data.probability * 100).toFixed(1)}% probability). 
+                        Redirecting to dashboard...
+                    `;
+                    resultContainer.style.display = 'block';
+                    predictionForm.parentElement.style.display = 'none';
+            
+                    // Redirect to dashboard after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 2000);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+
+    // New prediction button
+    newPredictionBtn.addEventListener('click', function() {
+        predictionForm.reset();
+        predictionForm.parentElement.style.display = 'block';
+        resultContainer.style.display = 'none';
+        
+        // Reset any errors
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(function(element) {
+            element.classList.remove('error');
+        });
+        
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(function(element) {
+            element.classList.remove('visible');
+        });
+        
+        // Hide pregnancies field if male is selected
+        if (maleRadio.checked) {
+            pregnanciesGroup.style.display = 'none';
+        }
+    });
+
+    // Mobile menu functionality
     const mobileMenuButton = document.querySelector('.mobile-menu-button');
     const navLinks = document.querySelector('.nav-links');
 
-    mobileMenuButton.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-    });
-});
+    if (mobileMenuButton && navLinks) {
+        mobileMenuButton.addEventListener('click', function() {
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        });
 
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("predict.js loaded successfully");
-
-    const formSlider = document.getElementById('formSlider');
-    if (!formSlider) return;
-
-    const questions = formSlider.querySelectorAll('.form-group');
-    let currentQuestion = 0;
-    const formData = {};
-    const submitButton = document.getElementById('submitPrediction');
-
-    // Validation ranges
-    const ranges = {
-        age: { min: 1, max: 120, unit: 'years' },
-        weight: { min: 0, max: 300, unit: 'kg' },
-        height: { min: 2, max: 8, unit: 'ft' },
-        pregnancies: { min: 0, max: 20, unit: '' },
-        glucose: { min: 0, max: 199, unit: 'mg/dL' },
-        bloodPressure: { min: 0, max: 200, unit: 'mmHg' },
-        skinThickness: { min: 0, max: 99, unit: 'mm' },
-        insulin: { min: 0, max: 846, unit: 'mu U/ml' }
-    };
-
-    // Show first question
-    questions[currentQuestion].classList.add('active');
-
-    function validateInput(input) {
-        const name = input.name;
-        const value = parseFloat(input.value);
-        const range = ranges[name];
-        return range && !isNaN(value) && value >= range.min && value <= range.max;
-    }
-
-    function toggleButton(element, buttonClass, show) {
-        const button = element.closest('.form-group').querySelector(buttonClass);
-        if (button) button.style.display = show ? 'inline-block' : 'none';
-    }
-
-    function moveToNextQuestion() {
-        questions[currentQuestion].classList.remove('active');
-        currentQuestion++;
-
-        if (currentQuestion === 4 && formData.gender === 'male') {
-            formData.pregnancies = 0;
-            currentQuestion++;
-        }
-
-        if (currentQuestion < questions.length) {
-            questions[currentQuestion].classList.add('active');
-            if (currentQuestion === questions.length - 1) submitButton.classList.add('active');
-        }
-    }
-
-    function moveToPreviousQuestion() {
-        if (currentQuestion > 0) {
-            questions[currentQuestion].classList.remove('active');
-            currentQuestion--;
-
-            if (currentQuestion === 4 && formData.gender === 'male') {
-                currentQuestion--;
+        // Reset mobile menu on window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                navLinks.style.display = 'flex';
+            } else {
+                navLinks.style.display = 'none';
             }
-
-            questions[currentQuestion].classList.add('active');
-            submitButton.classList.remove('active');
-        }
-    }
-
-    // Handle gender selection
-    const genderSelect = document.getElementById('gender');
-    if (genderSelect) {
-        genderSelect.addEventListener('change', () => {
-            formData.gender = genderSelect.value;
-            toggleButton(genderSelect, '.next-button', !!genderSelect.value);
-        });
-
-        const genderNextButton = genderSelect.closest('.form-group').querySelector('.next-button');
-        if (genderNextButton) {
-            genderNextButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (genderSelect.value) {
-                    moveToNextQuestion();
-                    toggleButton(genderSelect, '.next-button', false);
-                }
-            });
-        }
-    }
-
-    // Handle input changes for number fields
-    document.querySelectorAll('input[type="number"]').forEach(input => {
-        input.addEventListener('input', () => {
-            toggleButton(input, '.next-button', validateInput(input));
-            toggleButton(input, '.back-button', currentQuestion > 0);
-        });
-
-        const nextButton = input.closest('.form-group').querySelector('.next-button');
-        if (nextButton) {
-            nextButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (validateInput(input)) {
-                    formData[input.name] = input.value;
-                    moveToNextQuestion();
-                } else {
-                    const range = ranges[input.name];
-                    alert(`Enter a valid ${input.name} between ${range.min} and ${range.max} ${range.unit}.`);
-                }
-            });
-        }
-
-        const backButton = input.closest('.form-group').querySelector('.back-button');
-        if (backButton) {
-            backButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                moveToPreviousQuestion();
-            });
-        }
-    });
-
-    // Handle form submission
-    if (submitButton) {
-        submitButton.addEventListener('click', async() => {
-            let isValid = true;
-
-            for (const key in formData) {
-                if (key !== 'gender' && ranges[key]) {
-                    const value = parseFloat(formData[key]);
-                    if (isNaN(value) || value < ranges[key].min || value > ranges[key].max) {
-                        alert(`Invalid value for ${key}: ${formData[key]}. Must be between ${ranges[key].min} and ${ranges[key].max} ${ranges[key].unit}.`);
-                        isValid = false;
-                        break;
-                    }
-                }
-            }
-            if (isValid) {
-                console.log('Final Form Data:', formData);
-        
-                try {
-                    const response = await fetch('/predict/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCsrfToken(),
-                        },
-                        body: JSON.stringify({ data: formData })
-                    });
-        
-                    if (!response.ok) {
-                        console.log('Reaches here!');
-                        const errorText = await response.text();
-                        throw new Error(`Server Error: ${errorText}`);
-                    }
-        
-                    const data = await response.json();
-                    console.log(`This is the data:`, data);
-        
-                    if (data.success) {
-                        window.location.href = data.redirect_url;
-                    } else {
-                        alert(`Error: ${data.message || 'An unknown error occurred.'}`);
-                    }
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    alert('An error occurred while submitting your prediction.');
-                }
-            }            
-            
         });
     }
 
+    // Function to get CSRF token from cookies
     function getCsrfToken() {
         const name = 'csrftoken';
         const cookies = document.cookie.split(';');
@@ -182,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const [key, value] = cookie.trim().split('=');
             if (key === name) return value;
         }
-        console.warn('CSRF Token not found in cookies');
         return '';
     }
 });

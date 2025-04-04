@@ -147,7 +147,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 #session settings added manually for login and logout functionality 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_NAME = 'sessionid'
-SESSION_COOKIE_AGE = 60 * 10  # 2 minutes
+SESSION_COOKIE_AGE = 60 * 10  # 10 minutes
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
 
@@ -157,5 +157,5 @@ LOGOUT_REDIRECT_URL = 'predictor:login'
 
 
 #added manually for blog functionality
-# LOGIN_URL = '/login/'
+LOGIN_URL = '/login/'
 

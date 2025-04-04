@@ -1,19 +1,21 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BayMax - Diabetes Prediction</title>
-    <meta name="description" content="Advanced diabetes prediction system powered by AI">
+    <title>Diabetes Prediction - BayMax</title>
+    <meta name="description" content="Get your personalized diabetes risk assessment">
     <meta name="author" content="BayMax">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/predict.css' %}">
 </head>
+
 <body>
     <!-- Navbar -->
-        <!-- Navbar -->
+    <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="{% url 'predictor:index' %}" class="nav-logo">BayMax</a>
@@ -72,78 +74,126 @@
             </button>
         </div>
     </nav>
-
-    <!-- Prediction Form Section -->
-    <section class="prediction-form">
-        {% csrf_token %}  <!-- Add this line to include the CSRF token -->
+    <!-- Prediction Section -->
+    <section class="prediction-section">
         <div class="container">
-            <h1 class="fade-up">Diabetes Risk Assessment</h1>
-            <p class="fade-up">Answer the questions below one at a time.</p>
-            <div class="form-slider" id="formSlider">
-                <div class="form-group active" data-question="1">
-                    <label for="gender">Gender</label>
-                    <select id="gender" name="gender" required>
-                        <option value="">Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                    </select>
-                    <button class="next-button">Next</button>
-                </div>
-                <div class="form-group" data-question="2">
-                    <label for="age">Age (years) <span class="range-info">(1–120)</span></label>
-                    <input type="number" id="age" name="age" min="1" max="120" required placeholder="Enter age (1–120 years)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="3">
-                    <label for="weight">Weight (kg) <span class="range-info">(0–300)</span></label>
-                    <input type="number" id="weight" name="weight" min="0" max="300" step="0.1" required placeholder="Enter weight (0–300 kg)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="4">
-                    <label for="height">Height (ft) <span class="range-info">(2–8)</span></label>
-                    <input type="number" id="height" name="height" min="2" max="8" step="0.1" required placeholder="Enter height (2–8 ft)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="5">
-                    <label for="pregnancies">Pregnancies <span class="range-info">(0–20)</span></label>
-                    <input type="number" id="pregnancies" name="pregnancies" min="0" max="20" required placeholder="Enter number (0–20)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="6">
-                    <label for="glucose">Glucose Level (mg/dL) <span class="range-info">(0–199)</span></label>
-                    <input type="number" id="glucose" name="glucose" min="0" max="199" required placeholder="Enter glucose (0–199 mg/dL)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="7">
-                    <label for="bloodPressure">Blood Pressure (mmHg) <span class="range-info">(0–200)</span></label>
-                    <input type="number" id="bloodPressure" name="bloodPressure" min="0" max="200" required placeholder="Enter BP (0–200 mmHg)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="8">
-                    <label for="skinThickness">Skin Thickness (mm) <span class="range-info">(0–99)</span></label>
-                    <input type="number" id="skinThickness" name="skinThickness" min="0" max="99" required placeholder="Enter thickness (0–99 mm)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group" data-question="9">
-                    <label for="insulin">Insulin Level (mu U/ml) <span class="range-info">(0–846)</span></label>
-                    <input type="number" id="insulin" name="insulin" min="0" max="846" required placeholder="Enter insulin (0–846 mu U/ml)">
-                    <button class="next-button">Next</button>
-                    <button class="back-button">Back</button>
-                </div>
-                <div class="form-group submit-group" data-question="10">
-                    <button type="button" class="submit-button" id="submitPrediction" >
-                        Get Prediction
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
+            <div class="section-header">
+                <h1>Diabetes Risk Prediction</h1>
+                <p>Fill in your health metrics below to get a personalized diabetes risk assessment using our advanced AI algorithm.</p>
+            </div>
+
+            <div class="form-container">
+                <h2 class="form-title">Enter Your Health Information</h2>
+                <form id="predictionForm">
+                    <!-- Personal Information -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="male" name="gender" value="male" checked>
+                                        <label for="male">Male</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="female" name="gender" value="female">
+                                        <label for="female">Female</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="age" name="age" min="18" max="120" required>
+                                <div class="error-message" id="ageError">Age must be between 18 and 120</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Body measurements -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" id="weight" name="weight" min="30" max="300" step="0.1" required>
+                                <div class="error-message" id="weightError">Weight must be between 30 and 300 kg</div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="height" class="form-label">Height (cm)</label>
+                                <input type="number" class="form-control" id="height" name="height" min="100" max="250" required>
+                                <div class="error-message" id="heightError">Height must be between 100 and 250 cm</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pregnancies (shown only for female) -->
+                    <div class="form-group" id="pregnanciesGroup">
+                        <label for="pregnancies" class="form-label">Number of Pregnancies</label>
+                        <input type="number" class="form-control" id="pregnancies" name="pregnancies" min="0" max="20">
+                        <div class="error-message" id="pregnanciesError">Value must be between 0 and 20</div>
+                    </div>
+
+                    <!-- Medical metrics -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="glucose" class="form-label">Glucose Level (mg/dL)</label>
+                                <input type="number" class="form-control" id="glucose" name="glucose" min="70" max="400" required>
+                                <div class="error-message" id="glucoseError">Glucose level must be between 70 and 400 mg/dL</div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="bloodPressure" class="form-label">Blood Pressure (mm Hg)</label>
+                                <input type="number" class="form-control" id="bloodPressure" name="bloodPressure" min="60" max="200" required>
+                                <div class="error-message" id="bloodPressureError">Blood pressure must be between 60 and 200 mm Hg</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="skinThickness" class="form-label">Skin Thickness (mm)</label>
+                                <input type="number" class="form-control" id="skinThickness" name="skinThickness" min="10" max="100" step="0.1" required>
+                                <div class="error-message" id="skinThicknessError">Skin thickness must be between 10 and 100 mm</div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="insulin" class="form-label">Insulin Level (μU/mL)</label>
+                                <input type="number" class="form-control" id="insulin" name="insulin" min="0" max="846" required>
+                                <div class="error-message" id="insulinError">Insulin level must be between 0 and 846 μU/mL</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Get Prediction
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Result Section (Hidden initially) -->
+            <div class="result-container" id="resultContainer">
+                <h2 class="result-title">Your Diabetes Risk Assessment</h2>
+                <div class="result-value" id="resultValue">--</div>
+                <p class="result-description" id="resultDescription">
+                    Fill the form above to get your personalized diabetes risk assessment.
+                </p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="newPredictionBtn">
+                        New Prediction
                     </button>
                 </div>
             </div>
@@ -225,7 +275,9 @@
             </div>
         </div>
     </footer>
+    
 </body>
 <script src="{% static 'js/predict.js' %}?v={% now 'U' %}"></script>
 <script src="{% static 'js/script.js' %}?v={% now 'U' %}"></script>
 </html>
+
