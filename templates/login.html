@@ -50,7 +50,7 @@
         <!-- Sign In Form -->
         <div class="form form-signin">
             <div class="imgBox">
-                <img src="{% static 'images/istockphoto-1047558940-612x612.jpg' %}" alt="Login Image">
+                <img src="{% static 'images/diabetes' %}" alt="Login Image">
             </div>
             <div class="formBox">
                 <form id="signinForm" action="{% url 'predictor:login' %}" method="post">
@@ -69,7 +69,7 @@
                         <input type="submit" value="Login">
                     </div>
                     <div class="switch-form">
-                        <a href="{% url 'predictor:signup' %}" class="switch-btn">Don't have an account? Sign Up farhan</a>
+                        <a href="{% url 'predictor:signup' %}" class="switch-btn">Don't have an account? Sign Up</a>
                     </div>
                 </form>
             </div>
