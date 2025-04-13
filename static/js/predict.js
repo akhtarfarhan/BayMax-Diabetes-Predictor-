@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
         glucose: { min: 70, max: 400 },
         bloodPressure: { min: 60, max: 200 },
         skinThickness: { min: 10, max: 100 },
-        insulin: { min: 0, max: 846 }
+        insulin: { min: 0, max: 846 },
+        diabetesPedigree: { min: 0, max: 2.5 }
     };
 
     // Validate a field
@@ -87,7 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 glucose: document.getElementById('glucose').value,
                 bloodPressure: document.getElementById('bloodPressure').value,
                 skinThickness: document.getElementById('skinThickness').value,
-                insulin: document.getElementById('insulin').value
+                insulin: document.getElementById('insulin').value,
+                diabetesPedigree: document.getElementById('diabetesPedigree').value
             };
 
             // Send data to server
@@ -115,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Redirect to dashboard after 2 seconds
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
-                    }, 2000);
+                    }, 5000);
                 } else {
                     alert('Error: ' + data.message);
                 }
@@ -177,3 +179,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return '';
     }
 });
+
+// Add event listener for the new field
+const diabetesPedigreeField = document.getElementById('diabetesPedigree');
+if (diabetesPedigreeField) {
+    diabetesPedigreeField.addEventListener('input', function() {
+        validateField(this, constraints.diabetesPedigree.min, constraints.diabetesPedigree.max);
+    });
+}

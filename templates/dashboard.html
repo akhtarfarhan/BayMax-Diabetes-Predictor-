@@ -383,11 +383,13 @@ new {% endcomment %}
                                 <p><strong>Age:</strong> {{ latest_prediction.age }}</p>
                             </div>
                             <div class="card-details">
+                                
                                 <p><strong>Pregnancies:</strong> {{ latest_prediction.pregnancies|default:'N/A' }}</p>
                                 <p><strong>Glucose Level:</strong> {{ latest_prediction.glucose }} mg/dL</p>
                                 <p><strong>Blood Pressure:</strong> {{ latest_prediction.blood_pressure }} mmHg</p>
                                 <p><strong>Skin Thickness:</strong> {{ latest_prediction.skin_thickness }} mm</p>
                                 <p><strong>Insulin Level:</strong> {{ latest_prediction.insulin }} mu U/ml</p>
+                                <p><strong>Diabetes Pedigree Function:</strong> {{ latest_prediction.diabetes_pedigree|floatformat:3 }}</p>
                                 <p><strong>Weight:</strong> {{ latest_prediction.weight }} kg</p>
                                 <p><strong>Height:</strong> {{ latest_prediction.height }} cm</p>
                                 <p><strong>BMI:</strong> {{ latest_prediction.bmi|floatformat:1 }} kg/m²</p>  <!-- Display BMI -->

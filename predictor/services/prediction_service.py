@@ -32,9 +32,10 @@ class DiabetesPredictor:
                 - blood_pressure (float)
                 - skin_thickness (float)
                 - insulin (float)
+                - diabetes_pedigree (float)  # New field
                 
         Returns:
-            dict: {'risk_level': 'Low/Medium/High', 'probability': float}
+            dict: {'risk_level': 'Low/Medium/High', 'probability': float, 'bmi': float}
         """
         # Calculate BMI
         bmi = self.calculate_bmi(input_data['weight'], input_data['height'])
@@ -50,8 +51,9 @@ class DiabetesPredictor:
             input_data['skin_thickness'],
             input_data['insulin'],
             bmi,
+            input_data['diabetes_pedigree'],  # New field
             input_data['age'],
-            gender
+            # gender
         ]
         
         # Scale the features

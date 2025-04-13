@@ -147,7 +147,7 @@ def predict_view(request):
             data = json.loads(request.body.decode('utf-8')).get('data', {})
             user = User.objects.get(user_name=user_name)
 
-            # Extract form data
+            # Extract form data (add diabetes_pedigree)
             gender = data.get('gender')
             age = int(data.get('age'))
             weight = float(data.get('weight'))
@@ -157,6 +157,7 @@ def predict_view(request):
             blood_pressure = float(data.get('bloodPressure'))
             skin_thickness = float(data.get('skinThickness'))
             insulin = float(data.get('insulin'))
+            diabetes_pedigree = float(data.get('diabetesPedigree'))  # New field
 
             # Update user's age and gender
             user.age = age
@@ -173,7 +174,8 @@ def predict_view(request):
                 'glucose': glucose,
                 'blood_pressure': blood_pressure,
                 'skin_thickness': skin_thickness,
-                'insulin': insulin
+                'insulin': insulin,
+                'diabetes_pedigree': diabetes_pedigree  # New field
             })
 
             # Save prediction with BMI
@@ -183,13 +185,15 @@ def predict_view(request):
                 age=age,
                 weight=weight,
                 height=height,
-                bmi=prediction_result['bmi'],  # Save the calculated BMI
+                bmi=prediction_result['bmi'],
                 pregnancies=pregnancies,
                 glucose=glucose,
                 blood_pressure=blood_pressure,
                 skin_thickness=skin_thickness,
                 insulin=insulin,
-                risk_level=prediction_result['risk_level']
+                diabetes_pedigree=diabetes_pedigree,  # New field
+                risk_level=prediction_result['risk_level'],
+                probability=prediction_result['probability']
             )
 
             return JsonResponse({

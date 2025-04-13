@@ -329,12 +329,13 @@ class Prediction(models.Model):
     age = models.PositiveIntegerField(help_text="User's age in years")
     weight = models.FloatField(help_text="User's weight in kg")
     height = models.FloatField(help_text="User's height in cm")
-    bmi = models.FloatField(null=True, blank=True, help_text="User's Body Mass Index (kg/m²)")  # New field for BMI
+    bmi = models.FloatField(null=True, blank=True, help_text="User's Body Mass Index (kg/m²)")
     pregnancies = models.PositiveIntegerField(null=True, blank=True, help_text="Number of pregnancies (for females)")
     glucose = models.FloatField(help_text="Glucose level in mg/dL")
     blood_pressure = models.FloatField(help_text="Blood pressure in mm Hg")
     skin_thickness = models.FloatField(help_text="Skin thickness in mm")
     insulin = models.FloatField(help_text="Insulin level in μU/mL")
+    diabetes_pedigree = models.FloatField(help_text="Diabetes Pedigree Function", default=0.0)  # New field
     risk_level = models.CharField(max_length=20, help_text="Predicted risk level (Low, Moderate, High)")
     created_at = models.DateTimeField(default=datetime.datetime.now, help_text="Timestamp of prediction")
     probability = models.FloatField(null=True, blank=True, help_text="Prediction probability (0 to 1)")

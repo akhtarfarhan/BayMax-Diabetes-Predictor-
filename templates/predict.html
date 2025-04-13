@@ -170,6 +170,12 @@
                                 <div class="error-message" id="insulinError">Insulin level must be between 0 and 846 μU/mL</div>
                             </div>
                         </div>
+
+                        <div class="form-group">
+                            <label for="diabetesPedigree" class="form-label">Diabetes Pedigree Function</label>
+                            <input type="number" class="form-control" id="diabetesPedigree" name="diabetesPedigree" min="0" max="2.5" step="0.001" required>
+                            <div class="error-message" id="diabetesPedigreeError">Value must be between 0 and 2.5</div>
+                        </div>
                     </div>
 
                     <div class="form-actions">
