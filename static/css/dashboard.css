@@ -98,6 +98,17 @@
     margin-bottom: 0.5rem;
 }
 
+/* Glucose Trends Graph */
+.glucose-graph {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+#glucoseChart {
+    max-height: 300px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .dashboard h1 {
@@ -106,6 +117,10 @@
 
     .dashboard-grid {
         grid-template-columns: 1fr;
+    }
+
+    .glucose-graph {
+        height: 250px;
     }
 }
 
@@ -188,7 +203,7 @@
 }
 
 /* Chat Body */
-.chatbot-body {
+.chartbot-body {
     flex: 1;
     padding: 1rem;
     overflow-y: auto;

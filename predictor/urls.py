@@ -11,4 +11,6 @@ urlpatterns = [
     path('blog/', views.blog_view, name='blog'),
     path('predict/', views.predict_view, name='predict'),
     path('logout/', views.logout_view, name='logout'),
+    path('glucose-trends/', views.glucose_trends_view, name='glucose_trends'),
+    path('api/glucose-data/', views.glucose_data_api, name='glucose_data_api'),
 ]

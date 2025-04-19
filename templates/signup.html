@@ -1,17 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Sign Up - BayMax</title>
     <link rel="stylesheet" href="{% static 'css/login_register.css' %}">
 </head>
-
 <body>
     <div class="container">
-        <!-- Sign Up Form -->
         <div class="form form-signup">
             <div class="imgBox">
                 <img src="{% static 'images/istockphoto-1047558940-612x612.jpg' %}" alt="Signup Image">
@@ -19,34 +16,46 @@
             <div class="formBox">
                 <form id="signupForm" action="{% url 'predictor:signup' %}" method="post">
                     {% csrf_token %}
-                    <h2>Create Account</h2>
+                    <h2>CREATE ACCOUNT</h2>
+                    {% if messages %}
+                        <div class="error-messages">
+                            {% for message in messages %}
+                                <p style="color: {{ message.tags|default:'red' }};">{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     <div class="input-group">
-                        <input type="text" placeholder="Username" required name="user_name">
+                        <input type="text" placeholder="Username" 
+                               required name="user_name" id="username" pattern="[a-zA-Z0-9_.-@]{3,20}">
+                        <small class="helper-text">3-20 characters, letters, numbers, _.-@ only</small>
+                        <div class="error-message" id="usernameError"></div>
                     </div>
                     <div class="input-group">
-                        <input type="email" placeholder="Email" required name="email">
+                        <input type="email" placeholder="Email" required name="email" id="email">
+                        <div class="error-message" id="emailError"></div>
                     </div>
                     <div class="input-group">
-                        <input type="password" placeholder="Password" required name="password">
+                        <input type="password" placeholder="Password" 
+                               required name="password" id="password">
+                        <small class="helper-text">8-20 characters, at least one uppercase, one lowercase, one number, one special character (!@#$%^&*)</small>
+                        <div class="error-message" id="passwordError"></div>
                     </div>
                     <div class="input-group">
-                        <input type="password" placeholder="Confirm Password" required name="retype_password">
+                        <input type="password" placeholder="Confirm Password" required name="retype_password" id="retype_password">
+                        <div class="error-message" id="retypePasswordError"></div>
                     </div>
                     <div class="input-group">
                         <input type="submit" value="Sign Up">
-
                     </div>
                     <div class="switch-form">
-                        <a href="{% url 'predictor:login' %}" class="switch-btn" onclick="navigate(event, 'login.html', 'right')">Already
-                            have an account? Login</a>
+                        <a href="{% url 'predictor:login' %}" class="switch-btn" onclick="navigate(event, '{% url 'predictor:login' %}', 'right')">
+                            Already have an account? Login
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script>
-        
-    </script>
+    <script src="{% static 'js/login_register.js' %}"></script>
 </body>
-<script src="{% static 'script/login_register.js' %}"></script>
 </html>

@@ -124,3 +124,139 @@ function getCsrfToken() {
     }
     return '';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Chart.js
+    const ctx = document.getElementById('glucoseChart');
+    if (!ctx) return; // Exit if no predictions exist
+
+    const chartCtx = ctx.getContext('2d');
+
+    // Fetch glucose data from the backend
+    fetch('/api/glucose-data/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Assuming data is an array of objects with { date: "YYYY-MM-DD", glucose: number }
+        // Convert dates to numerical values for x-axis (days since first date)
+        const firstDate = new Date(data[0].date);
+        const scatterData = data.map(item => {
+            const date = new Date(item.date);
+            const daysSinceStart = (date - firstDate) / (1000 * 60 * 60 * 24); // Convert to days
+            return { x: daysSinceStart, y: item.glucose };
+        });
+
+        // Calculate trend line (linear regression)
+        const n = scatterData.length;
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        for (let i = 0; i < n; i++) {
+            sumX += scatterData[i].x;
+            sumY += scatterData[i].y;
+            sumXY += scatterData[i].x * scatterData[i].y;
+            sumXX += scatterData[i].x * scatterData[i].x;
+        }
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+
+        // Trend line data
+        const trendLineData = [
+            { x: 0, y: intercept },
+            { x: scatterData[n-1].x, y: slope * scatterData[n-1].x + intercept }
+        ];
+
+        // Initialize Chart.js
+        new Chart(chartCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Glucose Levels',
+                        data: scatterData,
+                        backgroundColor: 'rgba(255, 206, 86, 0.7)', // Yellow points
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        showLine: false
+                    },
+                    {
+                        label: 'Trend Line',
+                        data: trendLineData,
+                        type: 'line',
+                        fill: false,
+                        borderColor: 'rgba(0, 0, 0, 0.8)', // Black trend line
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Days Since First Measurement',
+                            color: 'var(--primary)',
+                            font: { size: 14 }
+                        },
+                        grid: { display: false },
+                        min: 0,
+                        max: scatterData[n-1].x + 10
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Glucose (mg/dL)',
+                            color: 'var(--primary)',
+                            font: { size: 14 }
+                        },
+                        beginAtZero: true,
+                        suggestedMax: 200,
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'var(--primary)',
+                        titleColor: 'var(--white)',
+                        bodyColor: 'var(--white)',
+                        borderColor: 'var(--mint)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                return `Glucose: ${context.parsed.y} mg/dL`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false // Hide legend for cleaner look
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching glucose data:', error);
+    });
+
+    // Function to get CSRF token from cookies
+    function getCsrfToken() {
+        const name = 'csrftoken';
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [key, value] = cookie.trim().split('=');
+            if (key === name) return value;
+        }
+        return '';
+    }
+});

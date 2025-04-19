@@ -8,6 +8,8 @@ from .models import User, Blog, Prediction
 import json
 import logging
 from .services.prediction_service import DiabetesPredictor
+from django.contrib import messages
+import re
 
 # Initialize the predictor at module level
 predictor = DiabetesPredictor()
@@ -34,6 +36,7 @@ def index_view(request):
     context = {'user_name': request.session.get('user_name')}
     return render(request, 'index.html', context)
 
+# Login View
 def login_view(request):
     context = {'user_name': request.session.get('user_name')}
     if request.method == 'POST':
@@ -55,25 +58,70 @@ def login_view(request):
             return render(request, 'login.html', {'error_message': 'Invalid username or password', **context})
     return render(request, 'login.html', context)
 
+# Signup View
 def signup_view(request):
     context = {'user_name': request.session.get('user_name')}
     if request.method == 'POST':
-        user_name = request.POST.get('user_name')
-        email = request.POST.get('email')
+        user_name = request.POST.get('user_name').strip()
+        email = request.POST.get('email').strip()
         password = request.POST.get('password')
         retype_password = request.POST.get('retype_password')
-        if not all([user_name, email, password, retype_password]):
-            return render(request, 'signup.html', {'error_message': 'All fields are required', **context})
+
+        # Username validation
+        reserved_words = ['admin', 'root', 'test', 'baymax', 'system']
+        username_pattern = r'^[a-zA-Z0-9_.-@]{3,20}$'
+
+        if not user_name:
+            messages.error(request, 'Username is required.')
+            return render(request, 'signup.html', context)
+        
+        if user_name.lower() in reserved_words:
+            messages.error(request, 'This username is reserved.')
+            return render(request, 'signup.html', context)
+        
+        if not re.match(username_pattern, user_name):
+            messages.error(request, 'Username must be 3-20 characters long and contain only letters, numbers, _, -, ., or @.')
+            return render(request, 'signup.html', context)
+        
+        if ' ' in user_name:
+            messages.error(request, 'Username cannot contain spaces.')
+            return render(request, 'signup.html', context)
+
+        # Password validation
+        password_pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$'
+        common_passwords = ['password', '12345678', 'qwerty', user_name.lower()]
+
+        if not password:
+            messages.error(request, 'Password is required.')
+            return render(request, 'signup.html', context)
+        
+        if password in common_passwords:
+            messages.error(request, 'This password is too common.')
+            return render(request, 'signup.html', context)
+        
+        if not re.match(password_pattern, password):
+            messages.error(request, 'Password must be 8-20 characters long, with at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).')
+            return render(request, 'signup.html', context)
+        
         if password != retype_password:
-            return render(request, 'signup.html', {'error_message': 'Passwords do not match', **context})
-        if User.objects.filter(user_name=user_name).exists() or User.objects.filter(email=email).exists():
-            return render(request, 'signup.html', {'error_message': 'User already exists', **context})
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'signup.html', context)
+
+        # Existing checks
+        if User.objects.filter(user_name__iexact=user_name).exists() or User.objects.filter(email__iexact=email).exists():
+            messages.error(request, 'Username or email already exists.')
+            return render(request, 'signup.html', context)
+
+        # Create user
         user = User.objects.create(user_name=user_name, email=email, password=password)
         user.save()
         logger.info(f"New user created: {user_name}")
+        messages.success(request, 'Account created successfully! Please log in.')
         return redirect('predictor:login')
+    
     return render(request, 'signup.html', context)
 
+# Logout View
 def logout_view(request):
     if 'user_name' in request.session:
         logger.info(f"User {request.session['user_name']} logged out")
@@ -103,6 +151,7 @@ def dashboard_view(request):
             del request.session['user_name']
         return redirect('predictor:login')
 
+# Blog View
 def blog_view(request):
     user_name = request.session.get('user_name')
     if request.method == 'POST':
@@ -208,3 +257,28 @@ def predict_view(request):
             return JsonResponse({'success': False, 'message': str(e)}, status=400)
 
     return render(request, 'predict.html', {'user_name': user_name})
+
+
+
+def glucose_trends_view(request):
+    user_name = request.session.get('user_name')
+    if not user_name:
+        return redirect('predictor:login')
+    return render(request, 'glucose_trends.html', {'user_name': user_name})
+
+
+from django.http import JsonResponse
+from .models import Prediction
+
+@csrf_exempt
+def glucose_data_api(request):
+    user_name = request.session.get('user_name')
+    if not user_name:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    try:
+        user = User.objects.get(user_name=user_name)
+        predictions = Prediction.objects.filter(user=user).order_by('created_at')
+        data = [{'date': pred.created_at.strftime('%Y-%m-%d'), 'glucose': pred.glucose} for pred in predictions]
+        return JsonResponse(data, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)

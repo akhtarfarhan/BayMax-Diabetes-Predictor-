@@ -196,93 +196,22 @@ import datetime
 from django.contrib.auth.hashers import make_password, check_password
 
 class User(models.Model):
-    """
-    Model representing a user with authentication capabilities.
-    """
-    # Core identification fields
-    user_name = models.CharField(
-        max_length=120,
-        primary_key=True,
-        help_text="Unique username for the user"
-    )
-    email = models.EmailField(
-        max_length=120,
-        unique=True,
-        help_text="User's email address"
-    )
-    
-    # Authentication fields
-    password = models.CharField(
-        max_length=120,
-        blank=True,
-        null=True,
-        help_text="Hashed password for the user"
-    )
-    retype_password = models.CharField(
-        max_length=120,
-        blank=True,
-        null=True,
-        help_text="Temporary field for password confirmation (not stored)"
-    )
-    
-    # Additional user information
-    age = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        help_text="User's age in years"
-    )
-    gender = models.CharField(
-        max_length=10,
-        choices=[('male', 'Male'), ('female', 'Female')],
-        blank=True,
-        null=True,
-        help_text="User's gender"
-    )
-    created_at = models.DateTimeField(
-        default=datetime.datetime.now,
-        help_text="Timestamp of user creation"
-    )
+    user_name = models.CharField(max_length=120, primary_key=True, help_text="Unique username for the user")
+    email = models.EmailField(max_length=120, unique=True, help_text="User's email address")
+    password = models.CharField(max_length=120, help_text="Hashed password for the user")  # Already non-nullable
+    age = models.PositiveIntegerField(blank=True, null=True, help_text="User's age in years")
+    gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')], blank=True, null=True, help_text="User's gender")
+    created_at = models.DateTimeField(default=datetime.datetime.now, help_text="Timestamp of user creation")
 
     def save(self, *args, **kwargs):
-        """
-        Override save method to hash password before saving.
-        """
         if self.password and not self.password.startswith("pbkdf2_"):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
 
-    def authenticate(self, user_name=None, password=None):
-        """
-        Authenticate a user based on username and password.
-        
-        Args:
-            user_name (str): The username to authenticate
-            password (str): The password to verify
-            
-        Returns:
-            User: User object if authentication succeeds, None otherwise
-        """
-        try:
-            user = User.objects.get(user_name=user_name)
-            if user.check_password(password):
-                return user
-        except User.DoesNotExist:
-            return None
-
     def check_password(self, password):
-        """
-        Verify if the provided password matches the stored hash.
-        
-        Args:
-            password (str): The password to check
-            
-        Returns:
-            bool: True if password matches, False otherwise
-        """
         return check_password(password, self.password)
 
     def __str__(self):
-        """String representation of the User object."""
         return self.email
 
 class Blog(models.Model):

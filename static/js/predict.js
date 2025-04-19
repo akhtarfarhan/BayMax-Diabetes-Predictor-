@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Redirect to dashboard after 2 seconds
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
-                    }, 5000);
+                    }, 9000);
                 } else {
                     alert('Error: ' + data.message);
                 }
