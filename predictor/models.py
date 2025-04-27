@@ -198,7 +198,7 @@ from django.contrib.auth.hashers import make_password, check_password
 class User(models.Model):
     user_name = models.CharField(max_length=120, primary_key=True, help_text="Unique username for the user")
     email = models.EmailField(max_length=120, unique=True, help_text="User's email address")
-    password = models.CharField(max_length=120, help_text="Hashed password for the user")  # Already non-nullable
+    password = models.CharField(max_length=120, help_text="Hashed password for the user")
     age = models.PositiveIntegerField(blank=True, null=True, help_text="User's age in years")
     gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')], blank=True, null=True, help_text="User's gender")
     created_at = models.DateTimeField(default=datetime.datetime.now, help_text="Timestamp of user creation")
@@ -215,43 +215,15 @@ class User(models.Model):
         return self.email
 
 class Blog(models.Model):
-    """
-    Model representing a blog post created by a user.
-    """
-    # Content fields
-    title = models.CharField(
-        max_length=200,
-        help_text="Title of the blog post"
-    )
-    content = models.TextField(
-        help_text="Main content of the blog post"
-    )
-    image = models.ImageField(
-        upload_to='blog_images/',
-        blank=True,
-        null=True,
-        help_text="Optional image for the blog post"
-    )
-    
-    # Relationship fields
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        help_text="User who authored this blog post"
-    )
-    
-    # Metadata
-    created_at = models.DateTimeField(
-        default=datetime.datetime.now,
-        help_text="Timestamp of blog creation"
-    )
+    title = models.CharField(max_length=200, help_text="Title of the blog post")
+    content = models.TextField(help_text="Main content of the blog post")
+    image = models.ImageField(upload_to='blog_images/', blank=True, null=True, help_text="Optional image for the blog post")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who authored this blog post")
+    created_at = models.DateTimeField(default=datetime.datetime.now, help_text="Timestamp of blog creation")
 
     def __str__(self):
-        """String representation of the Blog object."""
         return self.title
-    
 
-# prediction
 class Prediction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who made this prediction")
     gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')], help_text="User's gender")
@@ -264,7 +236,7 @@ class Prediction(models.Model):
     blood_pressure = models.FloatField(help_text="Blood pressure in mm Hg")
     skin_thickness = models.FloatField(help_text="Skin thickness in mm")
     insulin = models.FloatField(help_text="Insulin level in μU/mL")
-    diabetes_pedigree = models.FloatField(help_text="Diabetes Pedigree Function", default=0.0)  # New field
+    diabetes_pedigree = models.FloatField(help_text="Diabetes Pedigree Function", default=0.0)
     risk_level = models.CharField(max_length=20, help_text="Predicted risk level (Low, Moderate, High)")
     created_at = models.DateTimeField(default=datetime.datetime.now, help_text="Timestamp of prediction")
     probability = models.FloatField(null=True, blank=True, help_text="Prediction probability (0 to 1)")
