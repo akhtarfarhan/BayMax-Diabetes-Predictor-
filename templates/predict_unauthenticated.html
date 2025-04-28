@@ -1,0 +1,295 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction - BayMax</title>
+    <meta name="description" content="Get your personalized diabetes risk assessment">
+    <meta name="author" content="BayMax">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/predict.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'predictor:index' %}" class="nav-logo">BayMax</a>
+            <div class="nav-links">
+                <a href="{% url 'predictor:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'predictor:blog' %}" class="nav-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <span>Blog</span>
+                </a>
+                {% if user_name %}
+                    <a href="{% url 'predictor:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                            <line x1="15" y1="3" x2="15" y2="21"></line>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{% url 'predictor:logout' %}" class="nav-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Logout</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'predictor:login' %}" class="nav-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        <span>Login</span>
+                    </a>
+                {% endif %}
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="theme-toggle-button">
+                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+            <button class="mobile-menu-button">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Prediction Section -->
+    <section class="prediction-section predict-unauthenticated" 
+             data-predict-unauthenticated-url="{% url 'predictor:predict_unauthenticated' %}">
+        <div class="container">
+            <div class="section-header">
+                <h1>Diabetes Risk Prediction</h1>
+                <p>Fill in your health metrics below to get a personalized diabetes risk assessment using our advanced AI algorithm. No login required.</p>
+            </div>
+            <div class="form-container">
+                <h2 class="form-title">Enter Your Health Information</h2>
+                <form id="predictionForm">
+                    {% csrf_token %}
+                    <!-- Personal Information -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="male" name="gender" value="male" checked>
+                                        <label for="male">Male</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="female" name="gender" value="female">
+                                        <label for="female">Female</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="age" name="age" min="18" max="120" required>
+                                <div class="error-message" id="ageError">Age must be between 18 and 120</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Body measurements -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" id="weight" name="weight" min="30" max="300" step="0.1" required>
+                                <div class="error-message" id="weightError">Weight must be between 30 and 300 kg</div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="height" class="form-label">Height (cm)</label>
+                                <input type="number" class="form-control" id="height" name="height" min="100" max="250" required>
+                                <div class="error-message" id="heightError">Height must be between 100 and 250 cm</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Pregnancies (shown only for female) -->
+                    <div class="form-group" id="pregnanciesGroup">
+                        <label for="pregnancies" class="form-label">Number of Pregnancies</label>
+                        <input type="number" class="form-control" id="pregnancies" name="pregnancies" min="0" max="20">
+                        <div class="error-message" id="pregnanciesError">Value must be between 0 and 20</div>
+                    </div>
+                    <!-- Medical metrics -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="glucose" class="form-label">Glucose Level (mg/dL)</label>
+                                <input type="number" class="form-control" id="glucose" name="glucose" min="70" max="400" required>
+                                <div class="error-message" id="glucoseError">Glucose level must be between 70 and 400 mg/dL</div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="bloodPressure" class="form-label">Blood Pressure (mm Hg)</label>
+                                <input type="number" class="form-control" id="bloodPressure" name="bloodPressure" min="60" max="200" required>
+                                <div class="error-message" id="bloodPressureError">Blood pressure must be between 60 and 200 mm Hg</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="skinThickness" class="form-label">Skin Thickness (mm)</label>
+                                <input type="number" class="form-control" id="skinThickness" name="skinThickness" min="10" max="100" step="0.1" required>
+                                <div class="error-message" id="skinThicknessError">Skin thickness must be between 10 and 100 mm</div>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="insulin" class="form-label">Insulin Level (μU/mL)</label>
+                                <input type="number" class="form-control" id="insulin" name="insulin" min="0" max="846" required>
+                                <div class="error-message" id="insulinError">Insulin level must be between 0 and 846 μU/mL</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="diabetesPedigree" class="form-label">Diabetes Pedigree Function</label>
+                        <input type="number" class="form-control" id="diabetesPedigree" name="diabetesPedigree" min="0" max="2.5" step="0.001" required>
+                        <div class="error-message" id="diabetesPedigreeError">Value must be between 0 and 2.5</div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Get Prediction
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Result Section (Hidden initially) -->
+            <div class="result-container" id="resultContainer">
+                <h2 class="result-title">Your Diabetes Risk Assessment</h2>
+                <div class="result-value" id="resultValue">--</div>
+                <p class="result-description" id="resultDescription">
+                    Fill the form above to get your personalized diabetes risk assessment.
+                </p>
+                <div id="healthTips" style="display: none;">
+                    <h3>Health Tips</h3>
+                    <ul id="healthTipsList"></ul>
+                </div>
+                {% if not user_name %}
+                    <p>Want to save your prediction history? <a href="{% url 'predictor:login' %}">Log in now!</a></p>
+                {% endif %}
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="newPredictionBtn">
+                        New Prediction
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot UI -->
+    <div class="chatbot-container">
+        <button class="chatbot-button" id="chatbotButton">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+        </button>
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h3>BayMax Chat</h3>
+                <button class="close-button" id="closeButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="chatbot-body" id="chatbotBody">
+                <div class="message bot-message">
+                    <p>Hi! I'm BayMax. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatInput" placeholder="Type your message...">
+                <button id="sendButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>BayMax</h3>
+                    <p>Advanced diabetes prediction system powered by AI technology for better healthcare management.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'predictor:index' %}">Home</a></li>
+                        <li><a href="{% url 'predictor:blog' %}">Blog</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Us</h4>
+                    <ul>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <span>9800000000</span>
+                        </li>
+                        <li>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span>something@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 BayMax. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/predict.js' %}?v={% now 'U' %}"></script>
+    <script src="{% static 'js/script.js' %}?v={% now 'U' %}"></script>
+</body>
+</html>

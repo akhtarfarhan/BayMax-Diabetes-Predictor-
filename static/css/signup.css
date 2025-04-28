@@ -1,19 +1,9 @@
-:root {
-    --primary: #2D3648;
-    --primary-hover: rgba(45, 54, 72, 0.9);
-    --mint: #38B2AC;
-    --mint-light: #E5F4F1;
-    --mint-dark: #2C7A7B;
-    --gray-600: #4B5563;
-    --white: #FFFFFF;
-}
-
 body {
     margin: 0;
     padding: 0;
     font-family: 'Inter', sans-serif;
-    background-color: var(--white);
-    color: var(--primary);
+    background-color: var(--background);
+    color: var(--text);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -26,13 +16,14 @@ body {
     max-width: 900px;
     background-color: var(--white);
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px var(--border);
     overflow: hidden;
 }
 
 .form-section {
     width: 50%;
     padding: 40px;
+    position: relative;
 }
 
 .image-section {
@@ -67,12 +58,14 @@ body {
 .form-group input {
     width: 100%;
     padding: 10px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border);
     border-radius: 5px;
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s;
     font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+    color: var(--text);
 }
 
 .form-group input:focus {
@@ -80,7 +73,7 @@ body {
 }
 
 .form-group input::placeholder {
-    color: #9ca3af;
+    color: var(--gray-400);
 }
 
 .error {
@@ -138,6 +131,22 @@ button:hover {
 }
 
 .messages .success {
-    color: #38B2AC;
+    color: var(--mint);
     font-size: 0.875rem;
+}
+
+.theme-toggle-inline {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.theme-toggle-inline svg {
+    width: 24px;
+    height: 24px;
+    color: var(--gray-600);
 }

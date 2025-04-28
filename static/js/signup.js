@@ -17,16 +17,13 @@ function getCookie(name) {
             }
         }
     }
-    console.log(`CSRF Token from cookies (${name}):`, cookieValue);
     return cookieValue;
 }
 
 // Fallback: Get CSRF token from the form's hidden input
 function getCsrfTokenFromForm() {
     const csrfInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
-    const token = csrfInput ? csrfInput.value : null;
-    console.log('CSRF Token from form:', token);
-    return token;
+    return csrfInput ? csrfInput.value : null;
 }
 
 const setError = (element, message) => {
@@ -104,12 +101,10 @@ form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (validateForm()) {
         const formData = new FormData(form);
-        console.log('Submitting formData:', Object.fromEntries(formData));
         
         // Try to get CSRF token from cookies, fall back to form
         let csrfToken = getCookie('csrftoken');
         if (!csrfToken) {
-            console.log('Falling back to form for CSRF token');
             csrfToken = getCsrfTokenFromForm();
         }
 
@@ -127,19 +122,15 @@ form.addEventListener('submit', async (e) => {
                 },
                 body: formData
             });
-            console.log('Response status:', response.status);
             
-            // Check if the response is JSON
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 throw new Error('Server did not return JSON');
             }
 
             const data = await response.json();
-            console.log('Server response:', data);
             
             if (data.success) {
-                console.log('Redirecting to:', data.redirect_url);
                 window.location.href = data.redirect_url;
             } else if (data.errors) {
                 Object.entries(data.errors).forEach(([field, message]) => {
@@ -147,14 +138,13 @@ form.addEventListener('submit', async (e) => {
                     if (input) {
                         setError(input, message);
                     } else {
-                        setError(usernameInput, message); // Fallback for __all__ errors
+                        setError(usernameInput, message);
                     }
                 });
             } else {
                 setError(usernameInput, 'Signup failed. Please try again.');
             }
         } catch (error) {
-            console.error('Fetch error:', error);
             setError(usernameInput, 'Network error or server issue. Please try again.');
         }
     }

@@ -1,4 +1,5 @@
 {% load static %}
+{% load predictor_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +16,6 @@
         <div class="nav-container">
             <a href="{% url 'predictor:index' %}" class="nav-logo">BayMax</a>
             <div class="nav-links">
-                <!-- Home Link -->
                 <a href="{% url 'predictor:index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -23,7 +23,6 @@
                     </svg>
                     <span>Home</span>
                 </a>
-                <!-- Blog Link -->
                 <a href="{% url 'predictor:blog' %}" class="nav-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -31,7 +30,6 @@
                     </svg>
                     <span>Blog</span>
                 </a>
-                <!-- Dashboard Link -->
                 <a href="{% url 'predictor:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -40,7 +38,6 @@
                     </svg>
                     <span>Dashboard</span>
                 </a>
-                <!-- Logout Button -->
                 <a href="{% url 'predictor:logout' %}" class="nav-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -49,6 +46,20 @@
                     </svg>
                     <span>Logout</span>
                 </a>
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="theme-toggle-button">
+                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
             </div>
             <button class="mobile-menu-button">
                 <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,14 +68,13 @@
             </button>
         </div>
     </nav>
-
     <!-- Dashboard Section -->
     <section class="dashboard">
         <div class="container">
             <h1>Welcome Back, {{ name }}!</h1>
             <div class="dashboard-grid">
                 <!-- User Info Card -->
-                <div class="dashboard-card tilted-card">
+                <div class="dashboard-card">
                     <div class="card-content">
                         <h2>Your Information</h2>
                         <div class="card-summary">
@@ -75,16 +85,15 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Prediction History Card -->
-                <div class="dashboard-card tilted-card">
+                <div class="dashboard-card">
                     <div class="card-content">
                         <h2>Prediction History</h2>
                         {% if latest_prediction %}
                             <div class="card-summary">
                                 <p><strong>Last Prediction:</strong> 
                                     <span class="risk-{{ latest_prediction.risk_level|lower }}">
-                                        {{ latest_prediction.risk_level }}
+                                        {{ latest_prediction.risk_level }} ({{ latest_prediction.diabetes_probability|floatformat:1|multiply:100 }}% chance of diabetes)
                                     </span>
                                 </p>
                                 <p><strong>BMI:</strong> {{ latest_prediction.bmi|floatformat:1 }} ({{ latest_prediction.get_bmi_category }})</p>
@@ -106,8 +115,13 @@
                                         <tr>
                                             <td>{{ prediction.created_at|date:"Y-m-d" }}</td>
                                             <td>{{ prediction.risk_level }}</td>
-                                            <td>{{ prediction.probability|floatformat:2 }}</td>
-                                            <td>Glucose: {{ prediction.glucose }} mg/dL</td>
+                                            <td>{{ prediction.diabetes_probability|floatformat:1|multiply:100 }}%</td>
+                                            <td>
+                                                Glucose: {{ prediction.glucose }} mg/dL<br>
+                                                BMI: {{ prediction.bmi|floatformat:1 }}<br>
+                                                Weight: {{ prediction.weight }} kg<br>
+                                                Height: {{ prediction.height }} cm
+                                            </td>
                                         </tr>
                                     {% empty %}
                                         <tr>
@@ -119,9 +133,8 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- User Input Summary Card -->
-                <div class="dashboard-card tilted-card">
+                <div class="dashboard-card">
                     <div class="card-content">
                         <h2>Your Latest Input Summary</h2>
                         {% if latest_prediction %}
@@ -147,27 +160,27 @@
                         {% endif %}
                     </div>
                 </div>
-
-                <!-- Health Tips Card -->
-                <div class="dashboard-card tilted-card">
+                <!-- Personalized Health Tips Card -->
+                <div class="dashboard-card">
                     <div class="card-content">
-                        <h2>Health Tips</h2>
-                        <div class="card-summary">
-                            <p><strong>Tip 1:</strong> Monitor blood sugar levels.</p>
-                            <p><strong>Tip 2:</strong> Maintain a balanced diet.</p>
-                        </div>
-                        <div class="card-details health-tips">
-                            <ul>
-                                <li>Exercise regularly.</li>
-                                <li>Stay hydrated.</li>
-                                <li>Avoid sugary drinks.</li>
-                            </ul>
-                        </div>
+                        <h2>Personalized Health Tips</h2>
+                        {% if latest_prediction and latest_prediction.health_tips %}
+                            <div class="card-details health-tips">
+                                <ul>
+                                    {% for tip in latest_prediction.health_tips|json_parse %}
+                                        <li>{{ tip }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="card-summary">
+                                <p>No health tips available yet. Make a prediction to receive personalized advice.</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-
                 <!-- Glucose Trends Card -->
-                <div class="dashboard-card tilted-card">
+                <div class="dashboard-card">
                     <div class="card-content">
                         <h2>Glucose Trends</h2>
                         {% if predictions %}
@@ -184,7 +197,6 @@
             </div>
         </div>
     </section>
-
     <!-- Chatbot UI -->
     <div class="chatbot-container">
         <button class="chatbot-button" id="chatbotButton">
@@ -202,9 +214,10 @@
                     </svg>
                 </button>
             </div>
-            <div class="chartbot-body" id="chatbotBody">
+            <div class="chatbot-body" id="chatbotBody">
                 <div class="message bot-message">
                     <p>Hi! I'm BayMax. How can I help you today?</p>
+                    <p>ATTENTION: This is not a real doctor. Always consult one. Don't share information that can identify you.</p>
                 </div>
             </div>
             <div class="chatbot-input">
@@ -218,7 +231,6 @@
             </div>
         </div>
     </div>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -241,7 +253,7 @@
                     <ul>
                         <li>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                             </svg>
                             <span>9800000000</span>
                         </li>
@@ -260,10 +272,10 @@
             </div>
         </div>
     </footer>
-
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}?v={% now 'U' %}"></script>
     <script src="{% static 'js/dashboard_glucose.js' %}?v={% now 'U' %}"></script>
+    <script src="{% static 'js/script.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>
