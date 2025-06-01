@@ -122,16 +122,16 @@ form.addEventListener('submit', async (e) => {
                 },
                 body: formData
             });
-            
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server did not return JSON');
+
+            // Check if the response is OK (status 200-299)
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
             const data = await response.json();
             
             if (data.success) {
-                window.location.href = data.redirect_url;
+                window.location.href = data.redirect_url; // Redirect to login page
             } else if (data.errors) {
                 Object.entries(data.errors).forEach(([field, message]) => {
                     const input = document.getElementById(field);
@@ -145,6 +145,7 @@ form.addEventListener('submit', async (e) => {
                 setError(usernameInput, 'Signup failed. Please try again.');
             }
         } catch (error) {
+            console.error('Fetch error:', error);
             setError(usernameInput, 'Network error or server issue. Please try again.');
         }
     }

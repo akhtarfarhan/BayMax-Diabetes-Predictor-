@@ -22,346 +22,6 @@
     background-color: var(--white);
     padding: 2rem;
     border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dashboard-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-}
-
-.dashboard-card h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: var(--primary);
-    text-align: center;
-}
-
-.card-content {
-    padding: 1.5rem;
-    transition: opacity 0.3s ease;
-}
-
-.card-summary,
-.card-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.card-summary p,
-.card-details p {
-    font-size: 1rem;
-    color: var(--gray-700);
-    margin: 0;
-    margin-top: 5px;
-}
-
-.card-summary strong,
-.card-details strong {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-/* Prediction History Card */
-.card-summary .risk-low {
-    color: #28a745; /* Green for Low risk */
-    font-weight: 600;
-}
-
-.card-summary .risk-moderate {
-    color: #ffc107; /* Yellow for Moderate risk */
-    font-weight: 600;
-}
-
-.card-summary .risk-high {
-    color: #dc3545; /* Red for High risk */
-    font-weight: 600;
-}
-
-/* Prediction History Table */
-.prediction-history table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: var(--gray-700);
-    table-layout: auto; /* Allow table to adjust column widths based on content */
-}
-
-.prediction-history thead {
-    background-color: var(--mint);
-    color: var(--white);
-}
-
-.prediction-history th {
-    padding: 0.75rem;
-    text-align: left;
-    font-weight: 600;
-    white-space: nowrap; /* Prevent header text from wrapping */
-}
-
-.prediction-history tbody tr:nth-child(odd) {
-    background-color: #f9f9f9; /* Light gray for odd rows */
-}
-
-.prediction-history tbody tr:nth-child(even) {
-    background-color: var(--white); /* White for even rows */
-}
-
-.prediction-history td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid var(--mint);
-    word-wrap: break-word; /* Ensure long words wrap */
-    word-break: break-word; /* Break long words if necessary */
-    max-width: 150px; /* Set a max width for the "Details" column to prevent overflow */
-}
-
-.prediction-history td:last-child {
-    line-height: 1.5; /* Increase line height for multi-line details */
-}
-
-/* Health Tips List */
-.health-tips ul {
-    list-style-type: disc;
-    padding-left: 1.5rem;
-    margin-top: 1rem;
-}
-
-.health-tips li {
-    font-size: 1rem;
-    color: var(--gray-700);
-    margin-bottom: 0.5rem;
-}
-
-/* Glucose Trends Graph */
-.glucose-graph {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-
-#glucoseChart {
-    max-height: 300px;
-}
-
-/* Chatbot Container */
-.chatbot-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-/* Chat Button */
-.chatbot-button {
-    width: 60px;
-    height: 60px;
-    background-color: var(--mint);
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.chatbot-button:hover {
-    background-color: var(--mint-dark);
-    transform: scale(1.1);
-}
-
-.chatbot-button svg {
-    width: 24px;
-    height: 24px;
-    color: var(--white);
-}
-
-/* Chat Window */
-.chatbot-window {
-    width: 300px;
-    height: 400px;
-    background-color: var(--white);
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.chatbot-window.active {
-    display: flex;
-}
-
-/* Chat Header */
-.chatbot-header {
-    background-color: var(--mint);
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.chatbot-header h3 {
-    margin: 0;
-    color: var(--white);
-    font-size: 1.25rem;
-}
-
-.close-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.close-button svg {
-    width: 16px;
-    height: 16px;
-    color: var(--white);
-}
-
-/* Chat Body */
-.chartbot-body {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    background-color: var(--mint-light);
-}
-
-.message {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border-radius: 10px;
-    max-width: 80%;
-}
-
-.bot-message {
-    background-color: var(--white);
-    align-self: flex-start;
-}
-
-.user-message {
-    background-color: var(--mint);
-    color: var(--white);
-    align-self: flex-end;
-    margin-left: auto;
-}
-
-/* Chat Input */
-.chatbot-input {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background-color: var(--white);
-    border-top: 1px solid var(--mint);
-}
-
-.chatbot-input input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid var(--mint);
-    border-radius: 10px;
-    margin-right: 0.5rem;
-}
-
-.chatbot-input button {
-    background-color: var(--mint);
-    border: none;
-    border-radius: 10px;
-    padding: 0.5rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.chatbot-input button:hover {
-    background-color: var(--mint-dark);
-}
-
-.chatbot-input button svg {
-    width: 20px;
-    height: 20px;
-    color: var(--white);
-}
-
-/* Risk Level Colors */
-.risk-low {
-    color: #28a745; /* Green */
-}
-
-.risk-moderate {
-    color: #ffc107; /* Orange/Yellow */
-}
-
-.risk-high {
-    color: #dc3545; /* Red */
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .dashboard h1 {
-        font-size: 2rem;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .glucose-graph {
-        height: 250px;
-    }
-
-    .prediction-history table {
-        font-size: 0.8rem;
-    }
-
-    .prediction-history th,
-    .prediction-history td {
-        padding: 0.5rem;
-    }
-
-    .prediction-history td {
-        max-width: 100px; /* Reduce max-width further on smaller screens */
-    }
-
-    .chatbot-window {
-        width: 250px;
-        height: 350px;
-    }
-}
-
-/* Dashboard Section */
-.dashboard {
-    padding: 8rem 0 5rem;
-    background-color: var(--mint-light);
-    min-height: 100vh;
-}
-
-.dashboard h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    color: var(--primary);
-}
-
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-}
-
-.dashboard-card {
-    background-color: var(--white);
-    padding: 2rem;
-    border-radius: 1rem;
     box-shadow: 0 1px 3px var(--border);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -487,6 +147,162 @@
 
 #glucoseChart {
     max-height: 300px;
+}
+
+/* Chatbot Container */
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+/* Chat Button */
+.chatbot-button {
+    width: 60px;
+    height: 60px;
+    background-color: var(--mint);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.chatbot-button:hover {
+    background-color: var(--mint-dark);
+    transform: scale(1.1);
+}
+
+.chatbot-button svg {
+    width: 24px;
+    height: 24px;
+    color: var(--white);
+}
+
+/* Chat Window */
+.chatbot-window {
+    width: 300px;
+    height: 400px;
+    background-color: var(--white);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chatbot-window.active {
+    display: flex;
+}
+
+/* Chat Header */
+.chatbot-header {
+    background-color: var(--mint);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chatbot-header h3 {
+    margin: 0;
+    color: var(--white);
+    font-size: 1.25rem;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.close-button svg {
+    width: 16px;
+    height: 16px;
+    color: var(--white);
+}
+
+/* Chat Body */
+.chatbot-body {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: var(--mint-light);
+}
+
+.message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.bot-message {
+    background-color: var(--white);
+    align-self: flex-start;
+}
+
+.user-message {
+    background-color: var(--mint);
+    color: var(--white);
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+/* Chat Input */
+.chatbot-input {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--white);
+    border-top: 1px solid var(--mint);
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--mint);
+    border-radius: 10px;
+    margin-right: 0.5rem;
+}
+
+.chatbot-input button {
+    background-color: var(--mint);
+    border: none;
+    border-radius: 10px;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-input button:hover {
+    background-color: var(--mint-dark);
+}
+
+.chatbot-input button svg {
+    width: 20px;
+    height: 20px;
+    color: var(--white);
+}
+
+/* Risk Level Colors */
+.risk-low {
+    color: #28a745; /* Green */
+}
+
+.risk-moderate {
+    color: #ffc107; /* Orange/Yellow */
+}
+
+.risk-high {
+    color: #dc3545; /* Red */
 }
 
 /* Responsive Design */

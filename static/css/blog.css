@@ -7,6 +7,25 @@
     --white: #FFFFFF;
     --gray-600: #6B7280;
     --footer-bg: #1A2B49; /* Darker blue for footer */
+    --background: #FFFFFF; /* Default background for light mode */
+    --text: #0B2A4A; /* Default text color for light mode */
+    --card-bg: #FFFFFF; /* Default card background */
+    --shadow: rgba(0, 0, 0, 0.1); /* Default shadow color */
+}
+
+/* Dark mode adjustments */
+:root[data-theme="dark"] {
+    --primary: #A3BFFA; /* Lighter blue for dark mode */
+    --mint: #00B294; /* Keep teal consistent */
+    --mint-dark: #009876;
+    --mint-light: #1A3C34; /* Darker teal background for dark mode */
+    --white: #1A202C; /* Dark background for white replacements */
+    --gray-600: #A0AEC0; /* Lighter gray for dark mode */
+    --footer-bg: #0D1425; /* Even darker footer for dark mode */
+    --background: #1A202C; /* Dark background for dark mode */
+    --text: #E2E8F0; /* Light text for dark mode */
+    --card-bg: #2D3748; /* Darker card background */
+    --shadow: rgba(255, 255, 255, 0.1); /* Light shadow for dark mode */
 }
 
 /* General container styling */
@@ -17,14 +36,13 @@
 }
 
 /* Navbar */
-/* Navbar */
 .navbar {
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 50;
     background-color: var(--white);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--shadow);
     transition: all 0.3s;
 }
 
@@ -77,7 +95,11 @@
 }
 
 .nav-button:hover {
-    background-color: #09213D; /* Slightly darker shade of --primary */
+    background-color: #09213D; /* Slightly darker shade of --primary in light mode */
+}
+
+:root[data-theme="dark"] .nav-button:hover {
+    background-color: #7F9CF5; /* Lighter shade of --primary in dark mode */
 }
 
 .mobile-menu-button {
@@ -89,21 +111,59 @@
     font-size: 1.5rem;
 }
 
-/* Responsive Design */
+/* Theme Toggle Button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+
+.theme-toggle:hover {
+    color: var(--primary);
+    background-color: var(--mint-light);
+}
+
+.theme-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Responsive Design for Navbar */
 @media (max-width: 768px) {
     .nav-links {
         display: none;
+        position: absolute;
+        top: 4rem;
+        left: 0;
+        right: 0;
+        background-color: var(--white);
+        flex-direction: column;
+        padding: 1rem;
+        box-shadow: 0 4px 8px var(--shadow);
     }
+
+    .nav-links.active {
+        display: flex;
+    }
+
     .mobile-menu-button {
         display: block;
     }
 }
 
-
 /* Blog Header */
 .blog-header {
     padding: 6rem 0 2rem;
-    background-color: var(--white);
+    background-color: var(--background);
     text-align: center;
     margin-top: 4rem; /* Offset for fixed navbar */
 }
@@ -143,10 +203,10 @@
 }
 
 .blog-card {
-    background: var(--white);
+    background: var(--card-bg);
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px var(--shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -154,7 +214,7 @@
 
 .blog-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 16px var(--shadow);
 }
 
 .blog-card img {
@@ -230,6 +290,7 @@
 .footer-section p {
     font-size: 1rem;
     line-height: 1.6;
+    color: var(--gray-600);
 }
 
 .footer-section ul {
@@ -280,7 +341,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px var(--shadow);
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
@@ -336,9 +397,9 @@
 .blog-creation-window {
     width: 350px;
     height: 500px;
-    background-color: var(--white);
+    background-color: var(--card-bg);
     border-radius: 20px;
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 25px var(--shadow);
     display: none;
     flex-direction: column;
     transform: scale(0.9);
@@ -461,7 +522,7 @@
 /* Blog Creation Footer */
 .blog-creation-footer {
     padding: 1rem;
-    background-color: var(--white);
+    background-color: var(--card-bg);
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     display: flex;
@@ -534,11 +595,5 @@
     }
     .footer-section ul li {
         justify-content: center;
-    }
-    .nav-links {
-        display: none;
-    }
-    .mobile-menu-button {
-        display: block;
     }
 }

@@ -12,6 +12,7 @@ from django.contrib import messages
 import re
 from django.urls import reverse
 from django.db import IntegrityError
+from django.db import transaction
 
 # Initialize the predictor at module level
 predictor = DiabetesPredictor()
@@ -68,7 +69,7 @@ def login_view(request):
                 request.session['email'] = user.email
                 request.session.modified = True
                 logger.info(f"User {username} authenticated, session set: user_name={user.user_name}, email={user.email}")
-                return redirect('predictor:predict')  # Redirect to predict
+                return redirect('predictor:dashboard')  # Redirect to dashboard instead of predict
             else:
                 error_msg = 'Invalid username or password'
                 logger.debug(f"Password check failed for user {username}")
@@ -141,9 +142,14 @@ def signup_view(request):
         
         if errors:
             logger.debug(f"Validation errors: {errors}")
-            for field, error in errors.items():
-                messages.error(request, f"{field}: {error}")
-            return render(request, 'signup.html')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # For AJAX requests, return JSON errors
+                return JsonResponse({'success': False, 'errors': errors}, status=400)
+            else:
+                # For non-AJAX requests, render the form with errors
+                for field, error in errors.items():
+                    messages.error(request, f"{field}: {error}")
+                return render(request, 'signup.html')
         
         try:
             user = User.objects.create(
@@ -156,20 +162,36 @@ def signup_view(request):
             request.session['email'] = user.email
             request.session.modified = True
             messages.success(request, 'Account created successfully!')
-            return redirect('predictor:predict')  # Redirect to predict
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # For AJAX requests, return JSON with redirect URL
+                redirect_url = reverse('predictor:login')  # Redirect to login page after signup
+                return JsonResponse({'success': True, 'redirect_url': redirect_url})
+            else:
+                # For non-AJAX requests, perform HTTP redirect
+                return redirect('predictor:login')  # Redirect to login after signup
         except IntegrityError as e:
             logger.error(f"IntegrityError during user creation: {str(e)}")
             if 'user_name' in str(e).lower():
-                messages.error(request, "username: Username already exists")
+                errors['username'] = 'Username already exists'
             elif 'email' in str(e).lower():
-                messages.error(request, "email: Email already exists")
+                errors['email'] = 'Email already exists'
             else:
-                messages.error(request, "An error occurred during account creation. Please try again.")
-            return render(request, 'signup.html')
+                errors['general'] = 'An error occurred during account creation. Please try again.'
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': errors}, status=400)
+            else:
+                for field, error in errors.items():
+                    messages.error(request, f"{field}: {error}")
+                return render(request, 'signup.html')
         except Exception as e:
             logger.error(f"Unexpected error during user creation: {str(e)}")
-            messages.error(request, f"An unexpected error occurred: {str(e)}")
-            return render(request, 'signup.html')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': {'general': f"An unexpected error occurred: {str(e)}"}}, status=500)
+            else:
+                messages.error(request, f"An unexpected error occurred: {str(e)}")
+                return render(request, 'signup.html')
     
     logger.debug("Rendering signup page")
     return render(request, 'signup.html')
@@ -209,21 +231,25 @@ def logout_view(request):
 def dashboard_view(request):
     user_name = request.session.get('user_name')
     if not user_name:
+        logger.warning("Unauthorized access attempt to dashboard")
         return redirect('predictor:login')
+    
     try:
         user = User.objects.get(user_name=user_name)
         predictions = Prediction.objects.filter(user=user).order_by('-created_at')
         context = {
             'name': user.user_name,
             'email': user.email,
-            'age': user.age if user.age else 'Not provided',
-            'gender': getattr(user, 'gender', 'Not provided'),
+            'age': user.age if user.age is not None else 'Not provided',
+            'gender': user.gender if user.gender else 'Not provided',
             'user_name': user_name,
             'predictions': predictions,
             'latest_prediction': predictions.first() if predictions.exists() else None,
         }
+        logger.debug(f"Rendering dashboard for user {user_name} with context: {context}")
         return render(request, 'dashboard.html', context)
     except User.DoesNotExist:
+        logger.error(f"User {user_name} not found")
         if 'user_name' in request.session:
             del request.session['user_name']
         return redirect('predictor:login')
@@ -264,10 +290,13 @@ def blog_view(request):
 def predict_view(request):
     user_name = request.session.get('user_name')
     if not user_name:
+        logger.warning("Unauthorized access attempt to predict view")
         return redirect('predictor:login')
+    
     try:
         user = User.objects.get(user_name=user_name)
     except User.DoesNotExist:
+        logger.error(f"User {user_name} not found")
         if 'user_name' in request.session:
             del request.session['user_name']
         return redirect('predictor:login')
@@ -301,6 +330,12 @@ def predict_view(request):
                 'insulin': insulin,
                 'diabetes_pedigree': diabetes_pedigree
             })
+
+            # Update user's age and gender in the database
+            user.age = age
+            user.gender = gender
+            user.save()
+            logger.info(f"Updated user {user_name} with age={age} and gender={gender}")
 
             # Save prediction
             prediction = Prediction.objects.create(
@@ -392,12 +427,26 @@ def glucose_trends_view(request):
 @csrf_exempt
 def glucose_data_api(request):
     user_name = request.session.get('user_name')
+    logger.debug(f"Glucose data API called for user: {user_name}")
     if not user_name:
+        logger.warning("Unauthorized access attempt to glucose data API")
         return JsonResponse({'error': 'Unauthorized'}, status=401)
+    
     try:
-        user = User.objects.get(user_name=user_name)
-        predictions = Prediction.objects.filter(user=user).order_by('created_at')
-        data = [{'date': pred.created_at.strftime('%Y-%m-d'), 'glucose': pred.glucose} for pred in predictions]
-        return JsonResponse(data, safe=False)
+        with transaction.atomic():  # Use transaction context manager
+            user = User.objects.get(user_name=user_name)
+            logger.debug(f"User found: {user.user_name}")
+            predictions = Prediction.objects.filter(user=user).order_by('created_at')
+            logger.debug(f"Found {predictions.count()} predictions for user {user_name}")
+            data = [{'date': pred.created_at.strftime('%Y-%m-%d'), 'glucose': pred.glucose} for pred in predictions]
+            if not data:
+                logger.warning(f"No glucose data available for user {user_name}")
+                return JsonResponse({'error': 'No glucose data available'}, status=404)
+            logger.debug(f"Returning glucose data: {data}")
+            return JsonResponse(data, safe=False)
     except User.DoesNotExist:
+        logger.error(f"User {user_name} not found")
         return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        logger.error(f"Unexpected error in glucose_data_api: {str(e)}")
+        return JsonResponse({'error': 'Internal server error'}, status=500)
