@@ -103,7 +103,7 @@ Contributions are welcome! Please open issues or submit pull requests for new fe
 
 ## License
 
-[Specify your license here, e.g., MIT, GPL-3.0, etc.]
+This project is licensed under the MIT License.
 
 ---
 
